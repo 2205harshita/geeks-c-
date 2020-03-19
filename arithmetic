@@ -1,0 +1,30 @@
+//Various arithemetic operations using mixed data type
+#include<iostream>
+#include<math.h>
+using namespace std;
+int main()
+{
+    float a,b;
+    char c;
+    cout<<"Enter the first number : ";
+    cin>>a;
+    cout<<"\nEnter the secind number : ";
+    cin>>b;
+    cout<<"\nEnter the arithemetic operation + - * or / to be performed on the entered vales : ";
+    cin>>c;
+    switch(c)
+    {
+        case '+' : cout<<"\nThe sum of "<<a<<" and "<<b<<" is : "<<a+b;
+        break;
+        case '-' : cout<<"\nThe difference between "<<a<<" and "<<b<< " is : ";
+                    if(a>b)cout<<a-b;else cout<<b-a;
+                    break;
+        case '*' : cout<<"\nThe product of "<<a<<" and "<<b<<" is : "<<a*b;
+        break;
+        case '/' : cout<<"\nThe quotient of "<<a<<" and "<<b<<" is : "<<a/b;
+        break;
+        default : cout<<"\nInvalid arithemetic input !";
+        break;
+    }
+    return 0;
+}
