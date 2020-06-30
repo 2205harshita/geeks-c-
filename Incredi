@@ -142,3 +142,117 @@ function Minigraph({timeseries}) {
     </div>
   );
 }
+const { task } = require("./lib");
+const c = require("./lib/constants");
+
+(async function main() {
+  console.log("Running task on start...");
+  await task({
+    sheet: c.SPREAD_SHEET_LINKS,
+    tabs: {
+      links: c.TAB_LINKS
+    },
+    file: c.FILE_LINKS
+  });
+  await task({
+    sheet: c.SPREAD_SHEET_DOCTORS,
+    tabs: {
+      doctors: c.TAB_DOCTOR
+    },
+    file: c.FILE_DOCTORS
+  });
+  await task({
+    sheet: c.SPREAD_SHEET_FAQ,
+    tabs: {
+      faq: c.TAB_FAQ
+    },
+    file: c.FILE_FAQ
+  });
+  await task({
+    sheet: c.SPREAD_SHEET_TNC,
+    tabs: {
+      tnc: c.TAB_TNC
+    },
+    file: c.FILE_TNC
+  });
+  console.log("End of sheet-to-json_generic");
+})();
+set -eu
+
+repo_uri="https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+remote_name="origin"
+main_branch="master"
+target_branch="master"
+
+cd "$GITHUB_WORKSPACE"
+
+git config user.name "$GITHUB_ACTOR"
+git config user.email "${GITHUB_ACTOR}@bots.github.com"
+
+git checkout "$target_branch"
+git rebase "${remote_name}/${main_branch}"
+
+npm install drive-db
+npm install node-fetch
+npm install moment
+npm install moment-timezone
+
+cp ./faq.json ./faq_prev.json
+cp ./tnc.json ./tnc_prev.json
+cp ./links.json ./links_prev.json
+cp ./doctors.json ./doctors_prev.json
+
+node sheet-to-json_generic.js
+
+rm ./faq_prev.json
+rm ./tnc_prev.json
+rm ./links_prev.json
+rm ./doctors_prev.json
+
+set +e  # Grep succeeds with nonzero exit codes to show results.
+git status | grep 'new file\|modified'
+if [ $? -eq 0 ]
+then
+    set -e
+    git commit -am "data updated on - $(date)"
+    git remote set-url "$remote_name" "$repo_uri" # includes access token
+    git push --force-with-lease "$remote_name" "$target_branch"
+else
+    set -e
+    echo "No changes since last run"
+fi
+
+echo "finish"
+module.exports = {
+  env: {
+    browser: true,
+    es6: true,
+  },
+  extends: ['plugin:react/recommended', 'google', 'prettier', 'prettier/react'],
+  globals: {
+    Atomics: 'readonly',
+    SharedArrayBuffer: 'readonly',
+  },
+  parser: 'babel-eslint',
+  parserOptions: {
+    ecmaFeatures: {
+      jsx: true,
+    },
+    ecmaVersion: 2018,
+    sourceType: 'module',
+  },
+  plugins: ['react', 'prettier', 'react-hooks'],
+  rules: {
+    'require-jsdoc': 0,
+    'prettier/prettier': 'error',
+    'no-invalid-this': 0,
+    'react/prop-types': 0,
+    'react-hooks/rules-of-hooks': 'warn',
+    'react-hooks/exhaustive-deps': 'error',
+  },
+  settings: {
+    react: {
+      version: 'detect',
+    },
+  },
+};
